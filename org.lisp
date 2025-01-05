@@ -29,18 +29,18 @@
 (defgeneric generate (post))
 
 (defmethod generate ((post post))
-  (format nil "* ~a~T:~a:~%:PROPERTIES:~%:ID: ~a~%:TIME: ~a~%:END:~%~%~a~%** Responses~&~{~a~^~%~}"
-		  (or (subject post) (id post))
+  (format nil "* ~a~T:~a:~%:PROPERTIES:~%:ID: ~a~%:TIME: ~a~%:REPLIES: [[~a]]~%:END:~%~%~a~%"
+		  (id post)
 		  (id post)
 		  (id post)
 		  (time-posted post)
-		  (or (text post) "")
-		  (replies post)))
+		  (replies post)
+		  (or (text post) "")))
 
 (defmethod generate ((post image-post))
   (let* ((post-text (call-next-method))
-		(img (format nil "#+CAPTION: ~a~%[[~a]]" (file post) (get-image-file post)))
-		(pos (+ 6 (search ":END:" post-text))))
+		 (img (format nil "#+CAPTION: ~a~%[[./~a]]" (file post) (get-image-file post)))
+		 (pos (+ 6 (search ":END:" post-text))))
 	(add-to-string pos post-text img)))
 
 (defgeneric get-image-file (post))
@@ -52,3 +52,24 @@
   (let ((prev (subseq string1 0 pos))
 		(post (subseq string1 pos)))
 	(concatenate 'string prev string2 post)))
+
+(defun make-post (post)
+  (make-instance 'post :id (gethash "no" post)
+					   :text (gethash "com" post)	;TODO Translate html escaped characters
+					   :time (gethash "time" post) ;TODO Translate it onto a timestamp
+					   :replies (gethash "resto" post)))
+
+(defun make-image-post (post image-folder)
+  (make-instance 'image-post :id (gethash "no" post)
+					   :text (gethash "com" post)	;TODO Translate html escaped characters
+					   :time (gethash "time" post) ;TODO Translate it onto a timestamp
+					   :replies (gethash "resto" post)
+					   :image-id (gethash "tim" post)
+					   :file (gethash "filename" post)
+					   :extension (subseq (gethash "ext" post) 1)
+					   :img-folder image-folder))
+
+(defun get-org (posts)
+  (apply #'concatenate 'string (map 'list #'generate posts)))
+
+

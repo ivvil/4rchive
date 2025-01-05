@@ -42,3 +42,8 @@
 		(when (post-has-image-p post)
 		  (download-post-image board-id post location))))))
 
+(defun posts-to-objects (posts image-folder)
+  (map 'vector (lambda (post)
+				 (if (post-has-image-p post)
+					 (make-image-post post image-folder)
+					 (make-post post))) posts))
