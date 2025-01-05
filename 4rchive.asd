@@ -7,6 +7,7 @@
   :version "0.0.1"
   :serial t
   :depends-on (:dexador
-			   '#:com.inuoe.jzon)
+			   :com.inuoe.jzon)
   :components ((:file "package")
-               (:file "4rchive")))
+               (:file "4rchive")
+			   (:file "org")))
